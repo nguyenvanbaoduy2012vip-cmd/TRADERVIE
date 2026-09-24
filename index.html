@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNOW TRADE</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#07090c;color:#e8edf3;min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* AUTH */
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:
+radial-gradient(circle at 50% 0,#10251b 0,transparent 38%),#07090c}
+.auth-box{width:390px;max-width:100%;background:#0d1117;border:1px solid #222a33;border-radius:16px;padding:30px;box-shadow:0 20px 70px #000}
+.logo{font-size:28px;font-weight:800;letter-spacing:2px}
+.logo span{color:#20d47b}
+.sub{color:#7f8a98;margin:8px 0 25px}
+.tabs{display:flex;background:#090c10;border-radius:9px;padding:4px;margin-bottom:18px}
+.tabs button{flex:1;border:0;background:transparent;color:#788391;padding:10px;border-radius:7px}
+.tabs button.active{background:#171d24;color:#fff}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;color:#8994a2;margin-bottom:7px}
+.field input{width:100%;background:#080b0f;border:1px solid #29313b;color:#fff;padding:12px;border-radius:8px;outline:none}
+.field input:focus{border-color:#20d47b}
+.primary{width:100%;border:0;background:#20d47b;color:#04130c;font-weight:700;padding:12px;border-radius:8px;margin-top:5px}
+.demo-note{font-size:11px;color:#65707d;text-align:center;margin-top:14px}
+
+/* APP */
+#app{display:none}
+.topbar{height:64px;border-bottom:1px solid #1d242c;background:#0b0e12;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20}
+.brand{font-size:20px;font-weight:800;letter-spacing:1.5px}.brand span{color:#20d47b}
+.account{display:flex;align-items:center;gap:16px}.balance{text-align:right}.balance small{display:block;color:#687483;font-size:10px}.balance b{font-size:15px}
+.logout{border:1px solid #29313a;background:#11161c;color:#aeb7c2;padding:8px 11px;border-radius:7px}
+.container{max-width:1400px;margin:auto;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.card{background:#0d1117;border:1px solid #1c242d;border-radius:10px;padding:16px}
+.card small{color:#697583;font-size:11px}.card strong{display:block;margin-top:8px;font-size:20px}
+.green{color:#20d47b!important}.red{color:#ff4d5f!important}
+.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.panel{background:#0d1117;border:1px solid #1c242d;border-radius:10px;overflow:hidden}
+.panel-head{padding:15px 16px;border-bottom:1px solid #1c242d;display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-weight:700}.muted{color:#6d7885;font-size:11px}
+.market{width:100%;border-collapse:collapse}
+.market th{font-size:10px;color:#697582;text-align:left;font-weight:500;padding:11px 13px;border-bottom:1px solid #1c242d}
+.market td{padding:13px;border-bottom:1px solid #151b22;font-size:13px}
+.market tr:last-child td{border-bottom:0}
+.market tbody tr:hover{background:#11161c}
+.symbol{font-weight:800}.company{color:#7d8996;font-size:11px;margin-top:3px}
+.price{font-weight:700}.change{font-size:12px;font-weight:700}
+.trade-btn{background:#151b21;border:1px solid #2b343e;color:#dce2e8;padding:7px 12px;border-radius:6px;font-size:11px}
+.trade-btn:hover{background:#20d47b;color:#04130c;border-color:#20d47b}
+.chart-area{height:310px;padding:10px 15px 15px;position:relative}
+canvas{width:100%;height:100%}
+.selected-info{display:flex;gap:15px;align-items:end}
+.selected-info b{font-size:24px}
+.portfolio{margin-top:16px}
+.holding{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #181f27}
+.holding:last-child{border:0}
+.empty{text-align:center;padding:35px;color:#65717e;font-size:12px}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal-box{width:420px;max-width:100%;background:#0d1117;border:1px solid #2a333d;border-radius:12px;padding:20px;box-shadow:0 25px 90px #000}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.close{border:0;background:transparent;color:#73808d;font-size:22px}
+.trade-stock{background:#090c10;border:1px solid #1c242c;padding:13px;border-radius:8px;margin-bottom:15px}
+.trade-stock b{font-size:17px}.trade-stock span{display:block;color:#788492;font-size:11px;margin-top:4px}
+.trade-type{display:flex;gap:8px;margin-bottom:13px}
+.trade-type button{flex:1;padding:10px;border-radius:7px;border:1px solid #29323b;background:#11161c;color:#8995a2}
+.trade-type .buy.active{background:#20d47b;color:#04130c;border-color:#20d47b}
+.trade-type .sell.active{background:#ff4d5f;color:#fff;border-color:#ff4d5f}
+.qty{width:100%;background:#080b0f;border:1px solid #29313b;color:#fff;padding:12px;border-radius:8px;outline:0}
+.order-info{margin:12px 0;padding:12px;background:#090c10;border-radius:8px;color:#8995a2;font-size:12px;line-height:1.8}
+.confirm{width:100%;padding:12px;border:0;border-radius:8px;font-weight:700;background:#20d47b;color:#04130c}
+.confirm.sell{background:#ff4d5f;color:#fff}
+
+@media(max-width:900px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.layout{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+.topbar{padding:0 12px}.container{padding:12px}
+.account .balance{display:none}
+.market th:nth-child(3),.market td:nth-child(3){display:none}
+.market th,.market td{padding:11px 7px}
+.stats{gap:8px}.card{padding:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<section id="auth">
+  <div class="auth-box">
+    <div class="logo">SNOW <span>TRADE</span></div>
+    <div class="sub">Mô phỏng thị trường giao dịch</div>
+    <div class="tabs">
+      <button id="loginTab" class="active" onclick="switchAuth('login')">Đăng nhập</button>
+      <button id="registerTab" onclick="switchAuth('register')">Tạo tài khoản</button>
+    </div>
+    <div class="field">
+      <label>TÊN TÀI KHOẢN</label>
+      <input id="username" placeholder="Nhập tên tài khoản">
+    </div>
+    <div class="field">
+      <label>MẬT KHẨU</label>
+      <input id="password" type="password" placeholder="Nhập mật khẩu">
+    </div>
+    <button class="primary" id="authBtn" onclick="authAction()">ĐĂNG NHẬP</button>
+    <div class="demo-note">Bản HTML demo — dữ liệu hiện lưu trên trình duyệt.</div>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app">
+<header class="topbar">
+  <div class="brand">SNOW <span>TRADE</span></div>
+  <div class="account">
+    <div class="balance"><small>SỐ DƯ</small><b id="topBalance">5.000.000 ₫</b></div>
+    <button class="logout" onclick="openWallet()">Ví</button>
+    <button class="logout" onclick="logout()">Thoát</button>
+  </div>
+</header>
+
+<main class="container">
+  <div class="stats">
+    <div class="card"><small>VÍ</small><strong id="walletIdText">Chưa tạo</strong></div>
+    <div class="card"><small>TÀI SẢN</small><strong id="asset">5.000.000 ₫</strong></div>
+    <div class="card"><small>TIỀN MẶT</small><strong id="cash">5.000.000 ₫</strong></div>
+    <div class="card"><small>LỢI NHUẬN</small><strong id="profit">0 ₫</strong></div>
+    <div class="card"><small>TRẠNG THÁI</small><strong class="green">● LIVE</strong></div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Thị trường</div>
+            <div class="muted">Giá mô phỏng cập nhật liên tục</div>
+          </div>
+          <div class="muted" id="clock">--:--:--</div>
+        </div>
+        <table class="market">
+          <thead><tr><th>MÃ</th><th>GIÁ</th><th>THAY ĐỔI</th><th></th></tr></thead>
+          <tbody id="marketBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel portfolio">
+        <div class="panel-head"><div class="panel-title">Danh mục của tôi</div><div class="muted">Holdings</div></div>
+        <div id="portfolio"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="selected-info">
+            <div><div class="muted" id="chartCompany">FPT Corporation</div><b id="chartSymbol">FPT</b></div>
+            <strong id="chartPrice">142.300 ₫</strong>
+          </div>
+        </div>
+        <button class="trade-btn" onclick="openTrade()">TRADE</button>
+      </div>
+      <div class="chart-area"><canvas id="chart"></canvas></div>
+    </div>
+  </div>
+</main>
+</section>
+
+<!-- WALLET MODAL -->
+<div id="walletModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-head"><b>VÍ CỦA TÔI</b><button class="close" onclick="closeWallet()">×</button></div>
+    <div class="trade-stock">
+      <span>ID VÍ</span><b id="walletId">Chưa có</b>
+      <span style="margin-top:8px">SỐ DƯ</span><strong id="walletBalance">0 ₫</strong>
+    </div>
+    <div class="tabs" style="margin-bottom:14px">
+      <button id="depositTab" class="active" onclick="walletMode('deposit')">NẠP</button>
+      <button id="withdrawTab" onclick="walletMode('withdraw')">RÚT</button>
+    </div>
+    <div id="createWalletBox">
+      <label class="muted">PIN VÍ 6 CHỮ SỐ</label>
+      <input class="qty" id="walletPin" maxlength="6" inputmode="numeric" placeholder="••••••">
+      <button class="confirm" style="margin-top:10px" onclick="createWallet()">TẠO VÍ</button>
+    </div>
+    <div id="walletActionBox" class="hidden">
+      <label class="muted">ID VÍ</label>
+      <input class="qty" id="walletInputId" placeholder="Nhập ID ví">
+      <label class="muted" style="display:block;margin-top:10px">PIN 6 CHỮ SỐ</label>
+      <input class="qty" id="walletInputPin" maxlength="6" inputmode="numeric" type="password" placeholder="••••••">
+      <label class="muted" style="display:block;margin-top:10px">SỐ TIỀN</label>
+      <input class="qty" id="walletAmount" type="number" min="1" placeholder="50000">
+      <button id="walletSubmit" class="confirm" style="margin-top:10px" onclick="submitWalletRequest()">GỬI YÊU CẦU</button>
+      <div class="order-info" style="margin-bottom:0">Nạp/rút chỉ được ghi nhận sau khi Admin xử lý.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRADE MODAL -->
+<div id="tradeModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-head"><b>GIAO DỊCH</b><button class="close" onclick="closeTrade()">×</button></div>
+    <div class="trade-stock"><b id="tradeSymbol">FPT</b><span id="tradeCompany">FPT Corporation</span><strong id="tradePrice">142.300 ₫</strong></div>
+    <div class="trade-type">
+      <button id="buyBtn" class="buy active" onclick="setTradeType('buy')">MUA</button>
+      <button id="sellBtn" class="sell" onclick="setTradeType('sell')">BÁN</button>
+    </div>
+    <label class="muted">SỐ LƯỢNG CỔ PHIẾU</label>
+    <input class="qty" id="qty" type="number" min="1" value="20" oninput="updateOrderInfo()">
+    <div class="order-info" id="orderInfo"></div>
+    <button class="confirm" id="confirmBtn" onclick="executeTrade()">XÁC NHẬN MUA</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://fnayjzelawzntknatczz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_4ZppqEvXVmaGUB714KHawg_YeFYjO9w";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STOCKS = [
+ {symbol:"FPT",company:"FPT Corporation",price:142300},
+ {symbol:"VNM",company:"Vinamilk",price:82500},
+ {symbol:"VIC",company:"Vingroup",price:91200},
+ {symbol:"HPG",company:"Hoa Phat Group",price:27800},
+ {symbol:"MWG",company:"Mobile World",price:64300},
+ {symbol:"VCB",company:"Vietcombank",price:96500},
+ {symbol:"TCB",company:"Techcombank",price:38400},
+ {symbol:"MBB",company:"MBBank",price:25300},
+ {symbol:"SSI",company:"SSI Securities",price:31800},
+ {symbol:"VRE",company:"Vincom Retail",price:21400}
+];
+
+let stocks = JSON.parse(JSON.stringify(STOCKS));
+let selected = stocks[0];
+let tradeType = "buy";
+let chartHistory = {};
+let user = null;
+
+function money(n){return Math.round(n).toLocaleString("vi-VN")+" ₫"}
+function pct(n){return (n>=0?"+":"")+n.toFixed(2)+"%"}
+function getData(){
+  return JSON.parse(localStorage.getItem("snow_trade_users")||"{}");
+}
+function saveData(data){localStorage.setItem("snow_trade_users",JSON.stringify(data))}
+function switchAuth(type){
+  loginTab.classList.toggle("active",type==="login");
+  registerTab.classList.toggle("active",type==="register");
+  authBtn.textContent=type==="login"?"ĐĂNG NHẬP":"TẠO TÀI KHOẢN";
+  authBtn.dataset.type=type;
+}
+function authAction(){
+  const u=username.value.trim(), p=password.value;
+  if(!u||!p){alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu.");return}
+  const users=getData();
+  if((authBtn.dataset.type||"login")==="register"){
+    if(users[u]){alert("Tài khoản đã tồn tại.");return}
+    users[u]={password:p,cash:5000000,holdings:{},spent:0};
+    saveData(users); alert("Tạo tài khoản thành công. Bạn đã được cấp 5.000.000 ₫.");
+  }else{
+    if(!users[u]||users[u].password!==p){alert("Sai tài khoản hoặc mật khẩu.");return}
+  }
+  user={name:u,...users[u]}; localStorage.setItem("snow_current",u);
+  showApp();
+}
+function showApp(){
+  auth.style.display="none";app.style.display="block";
+  render(); drawChart(); updateUI(); refreshWallet();
+}
+function logout(){localStorage.removeItem("snow_current");location.reload()}
+let walletModeValue="deposit";
+let currentWallet=null;
+
+async function refreshWallet(){
+  if(!user?.name)return;
+  const {data,error}=await supabaseClient.from("wallets").select("wallet_id,balance,status").eq("username",user.name).maybeSingle();
+  if(error){console.warn(error);return}
+  currentWallet=data;
+  walletIdText.textContent=data?.wallet_id||"Chưa tạo";
+  walletId.textContent=data?.wallet_id||"Chưa có";
+  walletBalance.textContent=money(data?.balance||0);
+}
+function openWallet(){walletModal.classList.remove("hidden");refreshWallet()}
+function closeWallet(){walletModal.classList.add("hidden")}
+function walletMode(mode){
+  walletModeValue=mode;
+  depositTab.classList.toggle("active",mode==="deposit");
+  withdrawTab.classList.toggle("active",mode==="withdraw");
+  walletSubmit.textContent=mode==="deposit"?"GỬI YÊU CẦU NẠP":"GỬI YÊU CẦU RÚT";
+}
+async function createWallet(){
+  const pin=walletPin.value.trim();
+  if(!/^\d{6}$/.test(pin)){alert("PIN phải đúng 6 chữ số.");return}
+  const {data,error}=await supabaseClient.rpc("create_wallet",{p_username:user.name,p_pin:pin});
+  if(error){alert(error.message);return}
+  alert("Tạo ví thành công. ID ví: "+data);
+  walletPin.value="";
+  await refreshWallet();
+}
+async function submitWalletRequest(){
+  const wid=walletInputId.value.trim(), pin=walletInputPin.value.trim();
+  const amount=Number(walletAmount.value);
+  if(!wid||!/^\d{6}$/.test(pin)||!Number.isFinite(amount)||amount<=0){alert("Vui lòng nhập ID ví, PIN 6 số và số tiền hợp lệ.");return}
+  const {error}=await supabaseClient.rpc("create_wallet_request",{
+    p_username:user.name,p_wallet_id:wid,p_pin:pin,p_type:walletModeValue,p_amount:Math.floor(amount)
+  });
+  if(error){alert(error.message);return}
+  alert("Đã gửi yêu cầu. Admin sẽ xử lý.");
+  walletAmount.value="";walletInputPin.value="";
+  await refreshWallet();
+}
+
+function loadUser(){
+  const u=localStorage.getItem("snow_current"), users=getData();
+  if(u&&users[u]){user={name:u,...users[u]};showApp()}
+}
+function persistUser(){
+  const users=getData();users[user.name]={password:user.password,cash:user.cash,holdings:user.holdings,spent:user.spent||0};saveData(users)
+}
+function render(){
+  marketBody.innerHTML=stocks.map(s=>{
+    const change=((s.price-(s.base||s.price))/(s.base||s.price))*100;
+    return `<tr>
+      <td><div class="symbol">${s.symbol}</div><div class="company">${s.company}</div></td>
+      <td class="price">${money(s.price)}</td>
+      <td class="change ${change>=0?"green":"red"}">${pct(change)}</td>
+      <td><button class="trade-btn" onclick="selectStock('${s.symbol}');openTrade()">Trade</button></td>
+    </tr>`
+  }).join("");
+  portfolio.innerHTML="";
+  const entries=Object.entries(user.holdings||{}).filter(x=>x[1]>0);
+  if(!entries.length) portfolio.innerHTML='<div class="empty">Bạn chưa sở hữu cổ phiếu nào.</div>';
+  else entries.forEach(([sym,qty])=>{
+    const s=stocks.find(x=>x.symbol===sym);const value=s.price*qty;
+    portfolio.innerHTML+=`<div class="holding"><div><b>${sym}</b><div class="muted">${qty} cổ phiếu</div></div><b>${money(value)}</b></div>`
+  });
+}
+function updateUI(){
+  const holdingsValue=Object.entries(user.holdings||{}).reduce((a,[sym,q])=>{
+    const s=stocks.find(x=>x.symbol===sym);return a+(s?s.price*q:0)
+  },0);
+  const total=user.cash+holdingsValue;
+  topBalance.textContent=money(user.cash);cash.textContent=money(user.cash);asset.textContent=money(total);
+  const profit=total-5000000;
+  profit.textContent=money(profit);profit.className=profit>=0?"green":"red";
+}
+function selectStock(sym){
+  selected=stocks.find(s=>s.symbol===sym)||stocks[0];
+  chartSymbol.textContent=selected.symbol;chartCompany.textContent=selected.company;chartPrice.textContent=money(selected.price);
+  if(!chartHistory[selected.symbol]) initHistory(selected);
+  drawChart();
+}
+function initHistory(s){
+  let p=s.price;chartHistory[s.symbol]=[];
+  for(let i=0;i<60;i++){p*=1+(Math.random()-.5)*.018;chartHistory[s.symbol].push(p)}
+}
+stocks.forEach(s=>{s.base=s.price;initHistory(s)});
+
+function openTrade(){selectStock(selected.symbol);qty.value=20;setTradeType("buy");tradeModal.classList.remove("hidden");updateOrderInfo()}
+function closeTrade(){tradeModal.classList.add("hidden")}
+function setTradeType(type){
+  tradeType=type;buyBtn.classList.toggle("active",type==="buy");sellBtn.classList.toggle("active",type==="sell");
+  confirmBtn.textContent=type==="buy"?"XÁC NHẬN MUA":"XÁC NHẬN BÁN";confirmBtn.className="confirm"+(type==="sell"?" sell":"");updateOrderInfo()
+}
+function updateOrderInfo(){
+  const q=Math.max(0,Number(qty.value)||0), total=q*selected.price;
+  const owned=(user.holdings&&user.holdings[selected.symbol])||0;
+  orderInfo.innerHTML=`Giá: <b>${money(selected.price)}</b><br>Số lượng: <b>${q.toLocaleString("vi-VN")}</b><br>Tổng: <b>${money(total)}</b><br>Đang sở hữu: <b>${owned}</b>`
+}
+function executeTrade(){
+  const q=Math.floor(Number(qty.value));
+  if(!q||q<1){alert("Số lượng không hợp lệ.");return}
+  const total=q*selected.price;
+  user.holdings=user.holdings||{};
+  const owned=user.holdings[selected.symbol]||0;
+  if(tradeType==="buy"){
+    if(total>user.cash){alert("Không đủ tiền.");return}
+    user.cash-=total;user.holdings[selected.symbol]=owned+q;
+  }else{
+    if(q>owned){alert("Bạn không có đủ cổ phiếu để bán.");return}
+    user.cash+=total;user.holdings[selected.symbol]=owned-q;
+  }
+  persistUser();render();updateUI();closeTrade()
+}
+function tick(){
+  stocks.forEach(s=>{
+    // Biến động bình thường, đôi lúc có cú tăng/giảm mạnh.
+    let move=(Math.random()-.5)*0.012;
+    if(Math.random()<0.035) move+=(Math.random()<.5?-1:1)*(0.04+Math.random()*0.13);
+    s.price=Math.max(1000,s.price*(1+move));
+    chartHistory[s.symbol].push(s.price);
+    if(chartHistory[s.symbol].length>60)chartHistory[s.symbol].shift();
+  });
+  render();updateUI();
+  chartPrice.textContent=money(selected.price);
+  drawChart();
+  clock.textContent=new Date().toLocaleTimeString("vi-VN");
+}
+function drawChart(){
+  const c=document.getElementById("chart"),ctx=c.getContext("2d"),r=c.getBoundingClientRect(),d=devicePixelRatio||1;
+  c.width=r.width*d;c.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);
+  const w=r.width,h=r.height,pad=20;ctx.clearRect(0,0,w,h);
+  const data=chartHistory[selected.symbol]||[];
+  if(!data.length)return;
+  let min=Math.min(...data),max=Math.max(...data);if(min===max){min*=.99;max*=1.01}
+  ctx.strokeStyle="#182029";ctx.lineWidth=1;
+  for(let i=0;i<5;i++){let y=pad+i*(h-pad*2)/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke()}
+  const up=data[data.length-1]>=data[0];ctx.strokeStyle=up?"#20d47b":"#ff4d5f";ctx.lineWidth=2;
+  ctx.beginPath();
+  data.forEach((v,i)=>{const x=pad+i*(w-pad*2)/(data.length-1);const y=h-pad-(v-min)/(max-min)*(h-pad*2);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
+  ctx.stroke();
+}
+window.addEventListener("resize",drawChart);
+loadUser();
+if(!localStorage.getItem("snow_current"))switchAuth("login");
+setInterval(tick,1200);
+</script>
+</body>
+</html>
